@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('link_visits', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('ip');
+            $table->string('user_agent');
+            $table->timestamp('visited_at');
+            $table->foreignId('link_id')->constrained('links')->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -23,7 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-
+        Schema::dropIfExists('link_visits');
     }
 };
