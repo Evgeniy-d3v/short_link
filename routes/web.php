@@ -1,4 +1,5 @@
 <?php
+
 use App\Presentation\AuthController;
 use App\Presentation\LinksController;
 use Illuminate\Support\Facades\Route;
