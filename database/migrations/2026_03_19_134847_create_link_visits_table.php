@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('link_visits', function (Blueprint $table) {
             $table->id();
             $table->string('ip');
-            $table->string('user_agent');
+            $table->text('user_agent');
             $table->timestamp('visited_at');
             $table->foreignId('link_id')->constrained('links')->cascadeOnDelete();
             $table->timestamps();
