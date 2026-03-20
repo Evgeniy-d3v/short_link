@@ -8,6 +8,7 @@ use App\Application\Dto\ShortUrlDto;
 use App\Application\LinkRepositoryInterface;
 use App\Domain\Entities\Enum\ShortCodeLength;
 use App\Domain\Entities\Exception\DuplicateShortLinkException;
+use App\Domain\Entities\Exception\LongLinkNotFoundException;
 
 class LinkService
 {
@@ -29,7 +30,7 @@ class LinkService
             try {
                 $this->linkRepository->saveLinks($code, $normalizedLink, $dto->userId);
 
-                return new ShortUrlDto(config('app.url').'/s/'.$code);
+                return new ShortUrlDto(config('app.url').'/'.$code);
             } catch (DuplicateShortLinkException) {
             }
         } while (true);
@@ -38,6 +39,10 @@ class LinkService
     public function getLongLink(RedirectDto $dto): string
     {
         $link = $this->linkRepository->findLongLinkByShort($dto->code);
+        if ($link === null) {
+            throw new LongLinkNotFoundException('Ссылка не найдена', 404);
+        }
+
         $this->linkVisitService->saveVisit($dto, $link->id);
 
         return $link->long_link;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Entities\Exception\LongLinkNotFoundException;
 use App\Infrastructure\Middleware\AuthenticateUser;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,5 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (LongLinkNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 404);
+        });
     })->create();
