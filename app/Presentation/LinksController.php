@@ -23,10 +23,6 @@ class LinksController
     public function store(StorageRequest $request): View
     {
 
-        if (! auth()->id()) {
-            abort(403);
-        }
-
         $dto = new LongUrlDto(
             auth()->id(),
             $request->validated()['url']

@@ -6,8 +6,6 @@ use App\Application\Dto\LongUrlDto;
 use App\Application\Dto\RedirectDto;
 use App\Application\Dto\ShortUrlDto;
 use App\Application\LinkRepositoryInterface;
-use App\Domain\Entities\Enum\ShortCodeLength;
-use App\Domain\Entities\Exception\DuplicateShortLinkException;
 use App\Domain\Entities\Exception\LongLinkNotFoundException;
 
 class LinkService
@@ -25,15 +23,13 @@ class LinkService
         if ($shortLink != null) {
             return new ShortUrlDto($shortLink);
         }
-        do {
-            $code = $this->generateCode();
-            try {
-                $this->linkRepository->saveLinks($code, $normalizedLink, $dto->userId);
 
-                return new ShortUrlDto(config('app.url').'/'.$code);
-            } catch (DuplicateShortLinkException) {
-            }
-        } while (true);
+            $uniqId = $this->linkRepository->saveLongLink($normalizedLink, $dto->userId);
+            $base62 = $this->generateBase62Code($uniqId);
+            $this->linkRepository->saveShortLink($uniqId, $base62);
+
+            return new ShortUrlDto(config('app.url').'/'.$base62);
+
     }
 
     public function getLongLink(RedirectDto $dto): string
@@ -48,15 +44,16 @@ class LinkService
         return $link->long_link;
     }
 
-    private function generateCode(): string
+    private function generateBase62Code(int $uniqId): string
     {
-
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
+        $base = strlen($characters);
+
         $code = '';
 
-        for ($i = 0; $i < ShortCodeLength::SHORT->value; $i++) {
-            $code .= $characters[random_int(0, $charactersLength - 1)];
+        while ($uniqId > 0) {
+            $code = $characters[$uniqId % $base] . $code;
+            $uniqId = intdiv($uniqId, $base);
         }
 
         return $code;

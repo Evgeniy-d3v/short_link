@@ -3,25 +3,17 @@
 namespace App\Infrastructure\Persistence\Repositories;
 
 use App\Application\LinkRepositoryInterface;
-use App\Domain\Entities\Exception\DuplicateShortLinkException;
 use App\Infrastructure\Persistence\Models\Link;
 use Illuminate\Database\QueryException;
 
 class LinkRepository implements LinkRepositoryInterface
 {
-    public function saveLinks(string $shortLink, string $longLink, int $userId): void
+    public function saveShortLink(int $linkId, string $shortLink): void
     {
-        try {
-            Link::query()->create([
-                'short_link' => $shortLink,
-                'long_link' => $longLink,
-                'user_id' => $userId,
-            ]);
-        } catch (QueryException $e) {
-            if ($this->isDuplicateException($e)) {
-                throw new DuplicateShortLinkException('Короткая ссылка уже существует.', previous: $e);
-            }
-        }
+        $link = Link::findOrFail($linkId);
+
+        $link->short_link = $shortLink;
+        $link->save();
     }
 
     public function findShortLinkByLong(string $longLink): ?string
@@ -35,6 +27,13 @@ class LinkRepository implements LinkRepositoryInterface
     {
         return Link::where('short_link', $code)->first();
 
+    }
+    public function saveLongLink(string $longLink, int $userId): int
+    {
+        return  Link::query()->create([
+            'long_link' => $longLink,
+            'user_id' => $userId,
+        ])->id;
     }
 
     private function isDuplicateException(QueryException $e): bool

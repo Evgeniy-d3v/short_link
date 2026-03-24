@@ -2,7 +2,6 @@
 
 namespace App\Presentation\Request\LinkRequest;
 
-use App\Presentation\Request\LinkRequest\Rules\CodeLengthRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,7 +29,6 @@ class RedirectRequest extends FormRequest
                 'required',
                 'string',
                 'regex:/^[A-Za-z0-9]+$/',
-                new CodeLengthRule,
             ],
         ];
     }
